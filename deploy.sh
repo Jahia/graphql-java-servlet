@@ -1,0 +1,2 @@
+mvn deploy:deploy-file -Dfile=build/libs/graphql-java-servlet-0.9.1-SNAPSHOT.jar -DrepositoryId=thirdparty-snapshots -Durl=https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots/ -DpomFile=build/poms/pom-default.xml
+mvn deploy:deploy-file -Dfile=build/libs/graphql-java-servlet-0.9.1-SNAPSHOT-sources.jar -DrepositoryId=thirdparty-snapshots -Durl=https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots/ -DpomFile=build/poms/pom-default.xml -Dclassifier=sources
