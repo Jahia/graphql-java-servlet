@@ -51,7 +51,7 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
     private GraphQLSchemaProvider schemaProvider;
 
     protected void updateSchema() {
-        graphQLAnnotationsProcessor.getTypeRegistry().clear();
+        graphQLAnnotationsProcessor.removeAllTypes();
 
         for (GraphQLAnnotatedClassProvider extensionsProvider : extensionsProviders) {
             for (Class<?> aClass : extensionsProvider.getExtensions()) {
