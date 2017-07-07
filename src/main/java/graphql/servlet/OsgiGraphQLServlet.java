@@ -14,16 +14,12 @@
  */
 package graphql.servlet;
 
-import graphql.annotations.GraphQLAnnotations;
 import graphql.annotations.GraphQLAnnotationsProcessor;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.component.annotations.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,11 +42,20 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
     private ExecutionStrategyProvider executionStrategyProvider = new EnhancedExecutionStrategyProvider();
     private InstrumentationProvider instrumentationProvider = new NoOpInstrumentationProvider();
 
-    private GraphQLAnnotationsProcessor graphQLAnnotationsProcessor = GraphQLAnnotations.getInstance();
+    private GraphQLAnnotationsProcessor graphQLAnnotationsProcessor;
 
     private GraphQLSchemaProvider schemaProvider;
 
+    @Activate
+    public void activate() {
+        updateSchema();
+    }
+
     protected void updateSchema() {
+        if (graphQLAnnotationsProcessor == null) {
+            return;
+        }
+
         graphQLAnnotationsProcessor.removeAllTypes();
 
         for (GraphQLAnnotatedClassProvider extensionsProvider : extensionsProviders) {
@@ -89,14 +94,11 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
         this.schemaProvider = new DefaultGraphQLSchemaProvider(newSchema().query(queryTypeBuilder.build()).mutation(mutationType).build(types));
     }
 
-    public OsgiGraphQLServlet() {
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policyOption = ReferencePolicyOption.GREEDY)
+    public void setGraphQLAnnotationsProcessor(GraphQLAnnotationsProcessor graphQLAnnotationsProcessor) {
+        this.graphQLAnnotationsProcessor = graphQLAnnotationsProcessor;
         updateSchema();
     }
-
-//    @Reference(cardinality = ReferenceCardinality.MANDATORY, policyOption = ReferencePolicyOption.GREEDY)
-//    public void setGraphQLAnnotationsProcessor(GraphQLAnnotationsProcessor graphQLAnnotationsProcessor) {
-//        this.graphQLAnnotationsProcessor = graphQLAnnotationsProcessor;
-//    }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policyOption = ReferencePolicyOption.GREEDY)
     public void bindProvider(GraphQLProvider provider) {
