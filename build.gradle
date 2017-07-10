@@ -23,6 +23,9 @@ apply plugin: 'groovy'
 repositories {
     mavenLocal()
     maven {
+        url "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
+    }
+    maven {
         url "https://devtools.jahia.com/nexus/content/repositories/thirdparty-releases"
     }
     mavenCentral()
@@ -61,8 +64,8 @@ dependencies {
     // GraphQL
     compile 'com.graphql-java:graphql-java:3.0.0'
 
-    compileOnly 'com.graphql-java:graphql-java-annotations:3.0.0-jahia'
-    testCompile 'com.graphql-java:graphql-java-annotations:3.0.0-jahia'
+    compileOnly 'com.graphql-java:graphql-java-annotations:3.0.0-jahia1-SNAPSHOT'
+    testCompile 'com.graphql-java:graphql-java-annotations:3.0.0-jahia1-SNAPSHOT'
 
     // JSON
     compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
@@ -149,6 +152,17 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            url "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
+    }
+
 }
 
 release {
