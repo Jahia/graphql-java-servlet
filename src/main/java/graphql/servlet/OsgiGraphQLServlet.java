@@ -1,13 +1,11 @@
 package graphql.servlet;
 
+import graphql.annotations.GraphQLAnnotationsProcessor;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.component.annotations.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +28,7 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
     private final List<GraphQLQueryProvider> queryProviders = new ArrayList<>();
     private final List<GraphQLMutationProvider> mutationProviders = new ArrayList<>();
     private final List<GraphQLTypesProvider> typesProviders = new ArrayList<>();
+    private final List<GraphQLAnnotatedClassProvider> extensionsProviders = new ArrayList<>();
 
     private GraphQLContextBuilder contextBuilder = new DefaultGraphQLContextBuilder();
     private GraphQLRootObjectBuilder rootObjectBuilder = new DefaultGraphQLRootObjectBuilder();
@@ -37,14 +36,25 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
     private InstrumentationProvider instrumentationProvider = new NoOpInstrumentationProvider();
     private GraphQLErrorHandler errorHandler = new DefaultGraphQLErrorHandler();
 
+    private GraphQLAnnotationsProcessor graphQLAnnotationsProcessor;
+
     private GraphQLSchemaProvider schemaProvider;
 
-    protected void updateSchema() {
-        final GraphQLObjectType.Builder queryTypeBuilder = newObject().name("Query").description("Root query type");
+    @Activate
+    public void activate() {
+        updateSchema();
+    }
 
-        for (GraphQLQueryProvider provider : queryProviders) {
-            if (provider.getQueries() != null && !provider.getQueries().isEmpty()) {
-                provider.getQueries().forEach(queryTypeBuilder::field);
+    protected void updateSchema() {
+        if (graphQLAnnotationsProcessor == null) {
+            return;
+        }
+
+        graphQLAnnotationsProcessor.removeAllTypes();
+
+        for (GraphQLAnnotatedClassProvider extensionsProvider : extensionsProviders) {
+            for (Class<?> aClass : extensionsProvider.getExtensions()) {
+                graphQLAnnotationsProcessor.registerTypeExtension(aClass);
             }
         }
 
@@ -53,10 +63,19 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
             types.addAll(typesProvider.getTypes());
         }
 
+        final GraphQLObjectType.Builder queryTypeBuilder = graphQLAnnotationsProcessor.getObjectBuilder(GraphQLQuery.class);
+
+        for (GraphQLQueryProvider provider : queryProviders) {
+            if (provider.getQueries() != null && !provider.getQueries().isEmpty()) {
+                provider.getQueries().forEach(queryTypeBuilder::field);
+            }
+        }
+
+
         GraphQLObjectType mutationType = null;
 
         if (!mutationProviders.isEmpty()) {
-            final GraphQLObjectType.Builder mutationTypeBuilder = newObject().name("Mutation").description("Root mutation type");
+            final GraphQLObjectType.Builder mutationTypeBuilder = graphQLAnnotationsProcessor.getObjectBuilder(GraphQLMutation.class);
 
             for (GraphQLMutationProvider provider : mutationProviders) {
                 provider.getMutations().forEach(mutationTypeBuilder::field);
@@ -70,7 +89,9 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
         this.schemaProvider = new DefaultGraphQLSchemaProvider(newSchema().query(queryTypeBuilder.build()).mutation(mutationType).build(types));
     }
 
-    public OsgiGraphQLServlet() {
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policyOption = ReferencePolicyOption.GREEDY)
+    public void setGraphQLAnnotationsProcessor(GraphQLAnnotationsProcessor graphQLAnnotationsProcessor) {
+        this.graphQLAnnotationsProcessor = graphQLAnnotationsProcessor;
         updateSchema();
     }
 
@@ -85,6 +106,9 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
         if (provider instanceof GraphQLTypesProvider) {
             typesProviders.add((GraphQLTypesProvider) provider);
         }
+        if (provider instanceof GraphQLAnnotatedClassProvider) {
+            extensionsProviders.add((GraphQLAnnotatedClassProvider) provider);
+        }
         updateSchema();
     }
     public void unbindProvider(GraphQLProvider provider) {
@@ -96,6 +120,9 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
         }
         if (provider instanceof GraphQLTypesProvider) {
             typesProviders.remove(provider);
+        }
+        if (provider instanceof GraphQLAnnotatedClassProvider) {
+            extensionsProviders.remove((GraphQLAnnotatedClassProvider) provider);
         }
         updateSchema();
     }
@@ -127,6 +154,16 @@ public class OsgiGraphQLServlet extends GraphQLServlet {
     }
     public void unbindTypesProvider(GraphQLTypesProvider typesProvider) {
         typesProviders.remove(typesProvider);
+        updateSchema();
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policyOption = ReferencePolicyOption.GREEDY)
+    public void bindExtensionsProvider(GraphQLAnnotatedClassProvider extensionProvider) {
+        extensionsProviders.add(extensionProvider);
+        updateSchema();
+    }
+    public void unbindExtensionsProvider(GraphQLAnnotatedClassProvider extensionProvider) {
+        extensionsProviders.remove(extensionProvider);
         updateSchema();
     }
 
