@@ -18,6 +18,7 @@ targetCompatibility = '1.8'
 
 // Tests
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 repositories {
     mavenLocal()
@@ -149,7 +150,7 @@ publishing {
     repositories {
         maven {
             url "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
-            Credentials {
+            credentials {
                 username = mavenUser
                 password = mavenPassword
             }
