@@ -292,7 +292,7 @@ public abstract class GraphQLServlet extends HttpServlet implements Servlet, Gra
 
                 AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
                 final AsyncContext ac = req.startAsync();
-                ac.setTimeout(60 * 1000);
+                ac.setTimeout(0);
                 ac.addListener(new SubscriptionAsyncListener(subscriptionRef));
                 r.getPublisher().subscribe(new ExecutionResultSubscriber(subscriptionRef, ac));
             } else {
@@ -570,7 +570,7 @@ public abstract class GraphQLServlet extends HttpServlet implements Servlet, Gra
     private static class SubscriptionAsyncListener implements AsyncListener {
         private final AtomicReference<Subscription> subscriptionRef;
 
-        public SubscriptionAsyncListener(AtomicReference<Subscription> subscriptionRef) {
+        SubscriptionAsyncListener(AtomicReference<Subscription> subscriptionRef) {
             this.subscriptionRef = subscriptionRef;
         }
 
@@ -598,29 +598,44 @@ public abstract class GraphQLServlet extends HttpServlet implements Servlet, Gra
         private final AtomicReference<Subscription> subscriptionRef;
         private final AsyncContext ac;
 
-        public ExecutionResultSubscriber(AtomicReference<Subscription> subscriptionRef, AsyncContext ac) {
+        ExecutionResultSubscriber(AtomicReference<Subscription> subscriptionRef, AsyncContext ac) {
             this.subscriptionRef = subscriptionRef;
             this.ac = ac;
         }
 
+        private void write(String text) throws IOException {
+            log.debug("Next response : " + text);
+            PrintWriter writer = ac.getResponse().getWriter();
+            writer.write(text);
+            writer.flush();
+        }
+
         @Override
         public void onSubscribe(Subscription subscription) {
-            subscription.request(1);
             subscriptionRef.set(subscription);
+
+            try {
+                write(":GraphQL subscription started\n\n");
+            } catch (IOException e) {
+                ac.complete();
+                throw new RuntimeException(e);
+            }
+
+            subscription.request(1);
         }
 
         @Override
         public void onNext(ExecutionResult executionResult) {
             try {
-                final String response = getMapper().writeValueAsString(createResultFromDataErrorsAndExtensions(executionResult.getData(), executionResult.getErrors(), executionResult.getExtensions()));
-                log.debug("Next response : " + response);
-                PrintWriter writer = ac.getResponse().getWriter();
-                writer.write("data: " + response + "\n\n");
-                writer.flush();
-                subscriptionRef.get().request(1);
+                final String response = getMapper().writeValueAsString(createResultFromDataErrorsAndExtensions(executionResult.getData(),
+                        executionResult.getErrors(), executionResult.getExtensions()));
+                write("data: " + response + "\n\n");
             } catch (IOException e) {
                 ac.complete();
+                throw new RuntimeException(e);
             }
+
+            subscriptionRef.get().request(1);
         }
 
         @Override
