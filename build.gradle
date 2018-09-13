@@ -149,7 +149,9 @@ publishing {
 
     repositories {
         maven {
-            url "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
+            def releasesRepoUrl = "https://devtools.jahia.com/nexus/content/repositories/thirdparty-releases"
+            def snapshotsRepoUrl = "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials {
                 username = mavenUser
                 password = mavenPassword
