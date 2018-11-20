@@ -2,7 +2,7 @@ package graphql.servlet
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.Scalars
-import graphql.execution.ExecutionTypeInfo
+import graphql.execution.ExecutionStepInfo
 import graphql.schema.DataFetcher
 import graphql.schema.GraphQLFieldDefinition
 import graphql.schema.GraphQLNonNull
@@ -713,6 +713,6 @@ class GraphQLServletSpec extends Specification {
 
     def "typeInfo is serialized correctly"() {
         expect:
-            servlet.getMapper().writeValueAsString(ExecutionTypeInfo.newTypeInfo().type(new GraphQLNonNull(Scalars.GraphQLString)).build()) != "{}"
+            servlet.getMapper().writeValueAsString(ExecutionStepInfo.newExecutionStepInfo().type(new GraphQLNonNull(Scalars.GraphQLString)).build()) != "{}"
     }
 }
