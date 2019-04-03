@@ -95,7 +95,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-            groupId 'com.graphql-java-kickstart'
+            groupId 'com.graphql-java'
             artifactId project.name
             version project.version
 
