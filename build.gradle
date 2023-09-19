@@ -30,7 +30,6 @@ plugins {
     id "biz.aQute.bnd.builder" version "6.3.1" apply false
     id "org.sonarqube" version "3.4.0.2513"
     id "jacoco"
-    id "io.github.gradle-nexus.publish-plugin" version '1.1.0'
 }
 
 sonarqube {
@@ -52,7 +51,7 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+        maven { url "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots/" }
         maven { url "https://repo.spring.io/libs-milestone" }
     }
 
@@ -172,18 +171,21 @@ subprojects {
                     }
                 }
             }
+            repositories {
+                maven {
+                    def releasesRepoUrl = "https://devtools.jahia.com/nexus/content/repositories/thirdparty-releases"
+                    def snapshotsRepoUrl = "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
+                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                    credentials {
+                        username = mavenUser
+                        password = mavenPassword
+                    }
+                }
+            }
         }
     }
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            username = System.env.OSS_USER_TOKEN_KEY ?: project.findProperty('OSS_USER_TOKEN_KEY') ?: ''
-            password = System.env.OSS_USER_TOKEN_PASS ?: project.findProperty('OSS_USER_TOKEN_PASS') ?: ''
-        }
-    }
-}
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
