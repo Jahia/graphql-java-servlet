@@ -92,6 +92,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
+          echo "mavenUser=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
+          echo "mavenPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
           ./gradlew build jacocoTestReport sonarqube --info
