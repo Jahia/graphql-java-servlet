@@ -16,6 +16,7 @@ import graphql.kickstart.servlet.core.GraphQLServletListener;
 import graphql.kickstart.servlet.core.GraphQLServletRootObjectBuilder;
 import graphql.kickstart.servlet.osgi.GraphQLCodeRegistryProvider;
 import graphql.kickstart.servlet.osgi.GraphQLConfigurationProvider;
+import graphql.kickstart.servlet.osgi.GraphQLDirectiveProvider;
 import graphql.kickstart.servlet.osgi.GraphQLMutationProvider;
 import graphql.kickstart.servlet.osgi.GraphQLProvider;
 import graphql.kickstart.servlet.osgi.GraphQLQueryProvider;
@@ -85,6 +86,9 @@ public class OsgiGraphQLHttpServlet extends AbstractGraphQLHttpServlet {
     if (provider instanceof GraphQLTypesProvider) {
       schemaBuilder.add((GraphQLTypesProvider) provider);
     }
+    if (provider instanceof GraphQLDirectiveProvider) {
+      schemaBuilder.add((GraphQLDirectiveProvider) provider);
+    }
     if (provider instanceof GraphQLCodeRegistryProvider) {
       schemaBuilder.setCodeRegistryProvider((GraphQLCodeRegistryProvider) provider);
     }
@@ -107,6 +111,9 @@ public class OsgiGraphQLHttpServlet extends AbstractGraphQLHttpServlet {
     }
     if (provider instanceof GraphQLTypesProvider) {
       schemaBuilder.remove((GraphQLTypesProvider) provider);
+    }
+    if (provider instanceof GraphQLDirectiveProvider) {
+      schemaBuilder.remove((GraphQLDirectiveProvider) provider);
     }
     if (provider instanceof GraphQLCodeRegistryProvider) {
       schemaBuilder.setCodeRegistryProvider(() -> GraphQLCodeRegistry.newCodeRegistry().build());
@@ -158,6 +165,17 @@ public class OsgiGraphQLHttpServlet extends AbstractGraphQLHttpServlet {
 
   public void unbindTypesProvider(GraphQLTypesProvider typesProvider) {
     schemaBuilder.remove(typesProvider);
+    updateSchema();
+  }
+
+  @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+  public void bindDirectivesProvider(GraphQLDirectiveProvider directiveProvider) {
+    schemaBuilder.add(directiveProvider);
+    updateSchema();
+  }
+
+  public void unbindDirectivesProvider(GraphQLDirectiveProvider directiveProvider) {
+    schemaBuilder.remove(directiveProvider);
     updateSchema();
   }
 
