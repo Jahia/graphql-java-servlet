@@ -177,8 +177,8 @@ subprojects {
                     def snapshotsRepoUrl = "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
                     url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                     credentials {
-                        username = System.getenv(OSS_USER_TOKEN_KEY) ?: mavenUser
-                        password = System.getenv(OSS_USER_TOKEN_PASS) ?: mavenPassword
+                        username = System.getenv("OSS_USER_TOKEN_KEY") ?: mavenUser
+                        password = System.getenv("OSS_USER_TOKEN_PASS") ?: mavenPassword
                     }
                 }
             }
