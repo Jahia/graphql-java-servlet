@@ -135,13 +135,13 @@ subprojects {
                     pom {
                         name = PROJECT_NAME
                         description = 'relay.js-compatible GraphQL servlet'
-                        url = 'https://github.com/graphql-java-kickstart/graphql-java-servlet'
+                        url = 'https://github.com//Jahia/graphql-java-servlet'
                         inceptionYear = '2016'
 
                         scm {
-                            url = 'https://github.com/graphql-java-kickstart/graphql-java-servlet'
-                            connection = 'scm:https://github.com/graphql-java-kickstart/graphql-java-servlet.git'
-                            developerConnection = 'scm:git://github.com/graphql-java-kickstart/graphql-java-servlet.git'
+                            url = 'https://github.com/Jahia/graphql-java-servlet'
+                            connection = 'scm:https://github.com/Jahia/graphql-java-servlet.git'
+                            developerConnection = 'scm:git://github.com//Jahia/graphql-java-servlet.git'
                         }
 
                         licenses {

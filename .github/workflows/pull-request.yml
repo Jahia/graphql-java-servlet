@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        java: [ 8, 11, 17 ]
+        java: [ 11, 17 ]
     needs: validation
     runs-on: ${{ matrix.os }}
     steps:
@@ -94,4 +94,5 @@ jobs:
         run: |
           echo "mavenUser=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
           echo "mavenPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
-          ./gradlew build jacocoTestReport sonarqube --info
+          ./gradlew build jacocoTestReport --info
+          rm -rf gradle.properties
