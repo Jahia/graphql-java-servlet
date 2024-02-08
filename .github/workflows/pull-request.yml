@@ -21,6 +21,9 @@ jobs:
     needs: validation
     runs-on: ${{ matrix.os }}
     steps:
+      - run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
@@ -47,10 +50,7 @@ jobs:
       - name: Gradle Check (Windows)
         if: matrix.os == 'windows-latest'
         shell: cmd
-        run: |
-          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
-          gradlew --info check
+        run: gradlew --info check
 
   build:
     name: Sonar analysis
@@ -59,6 +59,9 @@ jobs:
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
+      - run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         if: env.SONAR_TOKEN != null
         with:
@@ -88,8 +91,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          echo "mavenUser=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
-          echo "mavenPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
-          ./gradlew build jacocoTestReport --info
-          rm -rf gradle.properties
+        run: ./gradlew build jacocoTestReport sonarqube --info

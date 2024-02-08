@@ -17,6 +17,9 @@ jobs:
     needs: validation
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
@@ -38,16 +41,16 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Gradle Check
-        run: |
-           echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-           echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
-           ./gradlew --info check
+        run: ./gradlew --info check
 
   build:
     name: Publish snapshot
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
@@ -69,28 +72,20 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Gradle Publish Snapshot
-        if: env.OSS_USER_TOKEN_KEY != null
-        run: |
-          echo "mavenUser=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
-          echo "mavenPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
-          ./gradlew clean build publish -x test
-          rm -rf gradle.properties
+        run: ./gradlew clean build publish -x test
 
   # sonar:
   #   name: Sonar analysis
   #   needs: validation
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - run: |
-  #          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-  #          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
   #     - uses: actions/checkout@v3
   #       with:
   #         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
   #     - name: Set up JDK 11
   #       uses: actions/setup-java@v3
   #       with:
-  #         distribution: 'temurin'
+  #         distribution: 'zulu'
   #         java-version: 11
   #     - name: Cache SonarCloud packages
   #       uses: actions/cache@v3

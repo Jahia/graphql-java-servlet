@@ -23,7 +23,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: 11
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: 11
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -68,4 +68,7 @@ jobs:
         run: .github/add-module-suffix.sh
       - name: Gradle Publish Snapshot
         if: env.OSS_USER_TOKEN_KEY != null
+        env:
+          OSS_USER_TOKEN_KEY: ${{ secrets.OSS_USER_TOKEN_KEY }}
+          OSS_USER_TOKEN_PASS: ${{ secrets.OSS_USER_TOKEN_PASS }}
         run: ./gradlew clean build publish -x test
