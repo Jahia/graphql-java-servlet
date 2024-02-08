@@ -14,12 +14,16 @@ jobs:
     needs: validation
     runs-on: ubuntu-latest
     steps:
+      - name: Setup credentials
+        run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -42,12 +46,16 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Setup credentials
+        run: |
+           echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+           echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -70,8 +78,6 @@ jobs:
           SIGNING_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
           SIGNING_SECRET_KEY_RING_FILE: ${{ secrets.GPG_SIGNING_SECRET_KEY_RING_FILE }}
-          OSS_USER_TOKEN_KEY: ${{ secrets.OSS_USER_TOKEN_KEY }}
-          OSS_USER_TOKEN_PASS: ${{ secrets.OSS_USER_TOKEN_PASS }}
         run: .github/release.sh
 
   tag:
@@ -79,12 +85,22 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Configure git
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.email "jahia-ci@jahia.com"
+          git config --global user.name "Jahia CI"
+      - name: Setup credentials
+        run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 11
       - name: Cache Gradle
         uses: actions/cache@v3

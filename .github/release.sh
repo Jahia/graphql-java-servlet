@@ -10,8 +10,8 @@ removeSnapshots() {
 echo "Publishing release to Maven Central"
 removeSnapshots
 
-if [[ "${BRANCH}" != "master" ]]; then
-  .github/add-module-suffix.sh
-fi
+# if [[ "${BRANCH}" != "master" ]]; then
+#   .github/add-module-suffix.sh
+# fi
 
-./gradlew clean build publishToSonatype closeAndReleaseSonatypeStagingRepository
+./gradlew clean build publish --info

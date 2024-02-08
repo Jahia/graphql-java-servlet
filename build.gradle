@@ -135,13 +135,13 @@ subprojects {
                     pom {
                         name = PROJECT_NAME
                         description = 'relay.js-compatible GraphQL servlet'
-                        url = 'https://github.com/graphql-java-kickstart/graphql-java-servlet'
+                        url = 'https://github.com//Jahia/graphql-java-servlet'
                         inceptionYear = '2016'
 
                         scm {
-                            url = 'https://github.com/graphql-java-kickstart/graphql-java-servlet'
-                            connection = 'scm:https://github.com/graphql-java-kickstart/graphql-java-servlet.git'
-                            developerConnection = 'scm:git://github.com/graphql-java-kickstart/graphql-java-servlet.git'
+                            url = 'https://github.com/Jahia/graphql-java-servlet'
+                            connection = 'scm:https://github.com/Jahia/graphql-java-servlet.git'
+                            developerConnection = 'scm:git://github.com//Jahia/graphql-java-servlet.git'
                         }
 
                         licenses {
@@ -177,8 +177,8 @@ subprojects {
                     def snapshotsRepoUrl = "https://devtools.jahia.com/nexus/content/repositories/thirdparty-snapshots"
                     url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                     credentials {
-                        username = mavenUser
-                        password = mavenPassword
+                        username = System.getenv("OSS_USER_TOKEN_KEY") ?: mavenUser
+                        password = System.getenv("OSS_USER_TOKEN_PASS") ?: mavenPassword
                     }
                 }
             }
