@@ -21,9 +21,6 @@ jobs:
     needs: validation
     runs-on: ${{ matrix.os }}
     steps:
-      - run: |
-          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
