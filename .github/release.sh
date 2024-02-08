@@ -14,4 +14,4 @@ removeSnapshots
 #   .github/add-module-suffix.sh
 # fi
 
-./gradlew clean build publishToSonatype closeAndReleaseSonatypeStagingRepository
+./gradlew clean build publish --info

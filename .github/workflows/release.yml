@@ -14,6 +14,10 @@ jobs:
     needs: validation
     runs-on: ubuntu-latest
     steps:
+      - name: Setup credentials
+        run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
@@ -35,17 +39,15 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Gradle Check
-        run: |
-          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
-          ./gradlew --info check
+        run: ./gradlew --info check
 
   build:
     name: Publish release
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: Setup credentials
+        run: |
            echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
            echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
@@ -76,8 +78,6 @@ jobs:
           SIGNING_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
           SIGNING_SECRET_KEY_RING_FILE: ${{ secrets.GPG_SIGNING_SECRET_KEY_RING_FILE }}
-          OSS_USER_TOKEN_KEY: ${{ secrets.NEXUS_USERNAME }}
-          OSS_USER_TOKEN_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: .github/release.sh
 
   tag:
@@ -85,9 +85,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - run: |
-           echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
-           echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
+      - name: Configure git
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.email "jahia-ci@jahia.com"
+          git config --global user.name "Jahia CI"
+      - name: Setup credentials
+        run: |
+          echo "OSS_USER_TOKEN_KEY=${{ secrets.NEXUS_USERNAME }}" >> $GITHUB_ENV
+          echo "OSS_USER_TOKEN_PASS=${{ secrets.NEXUS_PASSWORD }}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
