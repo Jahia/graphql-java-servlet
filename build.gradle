@@ -107,15 +107,15 @@ subprojects {
             withJavadocJar()
         }
 
-        if (!version.toString().endsWith('-SNAPSHOT')) {
-            ext["signing.keyId"] = System.env.SIGNING_KEY_ID
-            ext["signing.password"] = System.env.SIGNING_PASSWORD
-            ext["signing.secretKeyRingFile"] = System.env.SIGNING_SECRET_KEY_RING_FILE
+        // if (!version.toString().endsWith('-SNAPSHOT')) {
+        //     ext["signing.keyId"] = System.env.SIGNING_KEY_ID
+        //     ext["signing.password"] = System.env.SIGNING_PASSWORD
+        //     ext["signing.secretKeyRingFile"] = System.env.SIGNING_SECRET_KEY_RING_FILE
 
-            signing {
-                sign publishing.publications
-            }
-        }
+        //     signing {
+        //         sign publishing.publications
+        //     }
+        // }
 
         publishing {
             publications {
